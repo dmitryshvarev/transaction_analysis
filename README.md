@@ -14,4 +14,6 @@ pip install poetry
 poetry install
 poetry add pandas
 poetry add openpyxl
+poetry add requests
+poetry add yfinance
 ```

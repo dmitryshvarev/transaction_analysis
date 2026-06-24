@@ -1,4 +1,6 @@
 import os
+import yfinance as yf
+import json
 
 from collections import defaultdict
 from datetime import datetime
@@ -20,7 +22,7 @@ def greeting(user_date: str) -> str:
         return "Доброй ночи"
 
 
-def cards_info(user_date: str) -> List[Dict[str, Union[str, float]]]:
+def get_cards_info(user_date: str) -> List[Dict[str, Union[str, float]]]:
     """Возвращает информацию по используемым банковским картам"""
     transactions = get_transactions_for_analysis(os.path.abspath(r"..\data\operations.xlsx"), user_date)
 
@@ -75,11 +77,39 @@ def get_currency_rates() -> List[Dict[str, Union[str, float]]]:
     return currency_rates
 
 
+def get_stock_prices() -> List[Dict[str, Union[str, float]]]:
+    """Возвращает цены на акции"""
+    stocks = get_settings('../user_settings.json')['user_stocks']
+
+    stock_prices = []
+    for stock in stocks:
+        stock_price = dict()
+        stock_price['stock'] = stock
+        stock_price['price'] = round(yf.Ticker(f'{stock}').info.get('currentPrice'), 2)
+
+        stock_prices.append(stock_price)
+
+    return stock_prices
 
 
+def get_home_page_info(user_date: str) -> str:
+    """Возвращает JSON c информацией о транзакциях для главной страницы """
+    home_page = dict()
+    home_page["greeting"] = greeting(user_date)
+    home_page["cards"] = get_cards_info(user_date)
+    home_page["top_transactions"] = get_top_transactions(user_date)
+    home_page["currency_rates"] = get_currency_rates()
+    home_page["stock_prices"] = get_stock_prices()
 
-if __name__ == '__main__':
+    home_page_json = json.dumps(home_page, indent=4, ensure_ascii=False)
+
+    return home_page_json
+
+
+#if __name__ == '__main__':
+    #print(get_home_page_info("2020-05-20 06:00:00"))
     # print(greeting("2020-05-20 06:00:00"))
-    # print(cards_info("2019-04-30 13:30:00"))
+    # print(get_cards_info("2019-04-30 13:30:00"))
     # print(get_top_transactions("2019-04-30 13:30:00"))
-    print(get_currency_rates())
+    # print(get_currency_rates())
+    # print(get_stock_prices())

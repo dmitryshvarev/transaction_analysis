@@ -1,6 +1,11 @@
+import os
+import json
+
 from datetime import datetime
 from openpyxl import load_workbook
 from typing import Dict, List, Union
+
+from src.external_api import get_exchange_rate
 
 
 def get_transactions_for_analysis(file_path: str, user_date: str) -> List[Dict[str, Union[str, float, int]]]:
@@ -30,5 +35,32 @@ def get_transactions_for_analysis(file_path: str, user_date: str) -> List[Dict[s
     return transactions
 
 
+def amount_in_rub(transaction: Dict[str, Union[str, float, int]]) -> float:
+    """Возвращает сумму транзакции в рублях"""
+
+    amount = 0
+
+    currency_code = transaction.get('Валюта платежа')
+    if currency_code == "RUB":
+        amount = float(transaction.get('Сумма платежа'))
+    else:
+        exchange_rate = get_exchange_rate()["Valute"][currency_code]["Value"]
+        amount = round(float(transaction.get('Сумма платежа')) * exchange_rate, 2)
+
+    return amount
+
+
+def get_settings(settings_path: str) -> Dict[str, list]:
+    """Получаем данные из файла настроек"""
+    full_path = os.path.abspath(settings_path)
+
+    with open(full_path, "r", encoding="utf-8") as settings_file:
+        settings_data = json.load(settings_file)
+
+    return settings_data
+
+
+
 if __name__ == '__main__':
-    print(get_transactions_for_analysis(r"..\data\operations.xlsx", "2018-01-03 15:00:00"))
+    #print(get_transactions_for_analysis(r"..\data\operations.xlsx", "2018-01-03 15:00:00"))
+    print(get_settings('../user_settings.json'))

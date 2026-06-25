@@ -8,10 +8,16 @@
 ```
 https://github.com/dmitryshvarev/transaction_analysis.git
 ```
-2. Установите зависимости: 
+Установите зависимости: 
 ```
 pip install poetry
 poetry install
 poetry add pandas
 poetry add openpyxl
+poetry add requests
+poetry add yfinance
 ```
+## Тестирование:
+
+- с помощью библиотеки pytest в проекте протестированы все модули
+- все тесты выполнены успешно
